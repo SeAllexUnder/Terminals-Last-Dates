@@ -51,7 +51,6 @@ def get_trusted_terminals():
 
 
 def push_trusted_terminals(table, info_vehicles, client_vehicles, trusted_terminals):
-    trusted_terminals = len(set(trusted_terminals))
     rows = []
     for terminal in trusted_terminals:
         vehicle_name, client = 'Не определено', 'Не определен'
@@ -128,7 +127,7 @@ def get_last_dates():
     row_count = worksheet.row_count
     worksheet.batch_clear([f'A2:H{row_count}'])
     worksheet.update('A2', rows)
-    push_trusted_terminals(table, info_vehicles, client_vehicles, trusted_terminals)
+    push_trusted_terminals(table, info_vehicles, client_vehicles, list(set(trusted_terminals)))
 
 
 if __name__ == '__main__':
