@@ -118,9 +118,9 @@ def get_last_dates():
                 terminal,
                 vehicle_name,
                 first_date,
+                trust,
                 last_date,
                 count,
-                trust
             ]
             rows.append(row)
     worksheet = table.worksheet('Снятие данных с терминалов')
