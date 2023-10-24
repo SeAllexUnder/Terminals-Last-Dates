@@ -50,22 +50,27 @@ def main():
     info_sheet = table.worksheet('Информация по ТС')
     info_values = info_sheet.get_values()
     info_vehicles = {}
+    client_vehicles = {}
     for val in info_values:
         if val[1] == '' or val[1] == 'IMEI':
             continue
         info_vehicles[val[1]] = val[0]
+        client_vehicles[val[1]] = val[3]
     for ls in last_dates:
         # print(ls)
-        client = ls.split('/')[-2]
         port = ls.split('/')[-1]
         for terminal in last_dates[ls]:
             # print(terminal + ': ' + len(last_dates[ls][terminal]))
             first_date = datetime.fromtimestamp(min(last_dates[ls][terminal])).strftime('%d.%m.%Y %H:%M:%S')
             last_date = datetime.fromtimestamp(max(last_dates[ls][terminal])).strftime('%d.%m.%Y %H:%M:%S')
             count = len(last_dates[ls][terminal])
-            vehicle_name = 'Не определено'
+            vehicle_name, client = 'Не определено', 'Не определен'
             try:
                 vehicle_name = info_vehicles[terminal]
+            except KeyError:
+                pass
+            try:
+                client = client_vehicles[terminal]
             except KeyError:
                 pass
             row = [
@@ -81,7 +86,7 @@ def main():
     worksheet = table.worksheet('Снятие данных с терминалов')
     row_count = worksheet.row_count
     worksheet.batch_clear([f'A2:G{row_count}'])
-    worksheet.update(f'A2', rows)
+    worksheet.update('A2', rows)
 
 
 if __name__ == '__main__':
