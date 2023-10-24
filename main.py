@@ -1,11 +1,13 @@
-import glob
 import os
 import bz2
 import time
-# import Google_Sheets
-from datetime import datetime
-# from Google_Sheets import Google_Sheets as gs
 import gspread
+import postgreSQL
+from datetime import datetime
+
+
+def main():
+    get_last_dates()
 
 
 def read_directory(dir_name):
@@ -41,7 +43,7 @@ def read_directory(dir_name):
     return dates
 
 
-def main():
+def get_last_dates():
     last_dates = read_directory('D:\Back up')
     # print('Архивы считаны!\n\n')
     rows = []
@@ -87,6 +89,10 @@ def main():
     row_count = worksheet.row_count
     worksheet.batch_clear([f'A2:G{row_count}'])
     worksheet.update('A2', rows)
+
+
+def get_trusted_terminals():
+    sql = postgreSQL.PG_SQL()
 
 
 if __name__ == '__main__':
