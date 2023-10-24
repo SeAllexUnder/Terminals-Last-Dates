@@ -43,6 +43,38 @@ def read_directory(dir_name):
     return dates
 
 
+def get_trusted_terminals():
+    sql = postgreSQL.PG_SQL()
+    rows = sql.read.read_rows(table='confirmed_terminal_list', schema='public')
+    terminals = [row[0] for row in rows]
+    return terminals
+
+
+def push_trusted_terminals(table, info_vehicles, client_vehicles, trusted_terminals):
+    trusted_terminals = len(set(trusted_terminals))
+    rows = []
+    for terminal in trusted_terminals:
+        vehicle_name, client = 'Не определено', 'Не определен'
+        try:
+            vehicle_name = info_vehicles[str(terminal)]
+        except KeyError:
+            pass
+        try:
+            client = client_vehicles[str(terminal)]
+        except KeyError:
+            pass
+        row = [
+            client,
+            terminal,
+            vehicle_name
+        ]
+        rows.append(row)
+    worksheet = table.worksheet('Список доверенных термниалов')
+    row_count = worksheet.row_count
+    worksheet.batch_clear([f'A2:C{row_count}'])
+    worksheet.update('A2', rows)
+
+
 def get_last_dates():
     last_dates = read_directory('D:\Back up')
     # print('Архивы считаны!\n\n')
@@ -53,6 +85,7 @@ def get_last_dates():
     info_values = info_sheet.get_values()
     info_vehicles = {}
     client_vehicles = {}
+    trusted_terminals = get_trusted_terminals()
     for val in info_values:
         if val[1] == '' or val[1] == 'IMEI':
             continue
@@ -66,7 +99,7 @@ def get_last_dates():
             first_date = datetime.fromtimestamp(min(last_dates[ls][terminal])).strftime('%d.%m.%Y %H:%M:%S')
             last_date = datetime.fromtimestamp(max(last_dates[ls][terminal])).strftime('%d.%m.%Y %H:%M:%S')
             count = len(last_dates[ls][terminal])
-            vehicle_name, client = 'Не определено', 'Не определен'
+            vehicle_name, client, trust = 'Не определено', 'Не определен', '×'
             try:
                 vehicle_name = info_vehicles[terminal]
             except KeyError:
@@ -75,6 +108,11 @@ def get_last_dates():
                 client = client_vehicles[terminal]
             except KeyError:
                 pass
+            try:
+                if int(terminal) in trusted_terminals:
+                    trust = '✔'
+            except ValueError:
+                pass
             row = [
                 str(client),
                 str(port),
@@ -82,26 +120,21 @@ def get_last_dates():
                 vehicle_name,
                 first_date,
                 last_date,
-                count
+                count,
+                trust
             ]
             rows.append(row)
     worksheet = table.worksheet('Снятие данных с терминалов')
     row_count = worksheet.row_count
-    worksheet.batch_clear([f'A2:G{row_count}'])
+    worksheet.batch_clear([f'A2:H{row_count}'])
     worksheet.update('A2', rows)
-
-
-def get_trusted_terminals():
-    sql = postgreSQL.PG_SQL()
+    push_trusted_terminals(table, info_vehicles, client_vehicles, trusted_terminals)
 
 
 if __name__ == '__main__':
     main()
-    # exit()
     while True:
         # print(datetime.now())
         if datetime.now().minute == 55:
             main()
         time.sleep(60)
-    # print(int(datetime.now().minute))
-    # main()
