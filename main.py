@@ -125,9 +125,11 @@ def get_last_dates():
             rows.append(row)
     worksheet = table.worksheet('Снятие данных с терминалов')
     row_count = worksheet.row_count
-    worksheet.batch_clear([f'A2:H{row_count}'])
-    worksheet.update('A2', rows)
+    worksheet.batch_clear([f'A3:H{row_count}'])
+    worksheet.update('A3', rows)
     push_trusted_terminals(table, info_vehicles, client_vehicles, list(set(trusted_terminals)))
+    current_time = datetime.fromtimestamp(time.time()).strftime('%d.%m.%Y %H:%M:%S')
+    worksheet.update_cell(1, 2, current_time)
 
 
 if __name__ == '__main__':
