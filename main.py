@@ -19,22 +19,24 @@ def read_directory(dir_name):
     if len(archives) != 0:
         dates[dir_name] = {}
     for a in archives:
-        with bz2.open(f'{dir_name}/{a}', 'r') as bz2_file:
-            rows = bz2_file.readlines()
-            for r in rows:
-                row = r.decode('utf-8')
-                terminal = row.split(';')[2]
-                date = row.split(';')[1]
-                unix_date = ''
-                try:
-                    unix_date = int(datetime.strptime(date, "%Y-%m-%d %H:%M:%S.%f").timestamp())
-                except ValueError:
-                    # unix_date = int(datetime.strptime(date, "%Y-%m-%d %H:%M:%S").timestamp())
-                    continue
-                if terminal not in dates[dir_name]:
-                    dates[dir_name][terminal] = []
-                dates[dir_name][terminal].append(unix_date)
-
+        try:
+            with bz2.open(f'{dir_name}/{a}', 'r') as bz2_file:
+                rows = bz2_file.readlines()
+                for r in rows:
+                    row = r.decode('utf-8')
+                    terminal = row.split(';')[2]
+                    date = row.split(';')[1]
+                    unix_date = ''
+                    try:
+                        unix_date = int(datetime.strptime(date, "%Y-%m-%d %H:%M:%S.%f").timestamp())
+                    except ValueError:
+                        # unix_date = int(datetime.strptime(date, "%Y-%m-%d %H:%M:%S").timestamp())
+                        continue
+                    if terminal not in dates[dir_name]:
+                        dates[dir_name][terminal] = []
+                    dates[dir_name][terminal].append(unix_date)
+        except OSError:
+            continue
     # print(sub_directories)
     for sub in sub_directories:
         sub_last_dates = read_directory(f'{dir_name}/{sub}')
